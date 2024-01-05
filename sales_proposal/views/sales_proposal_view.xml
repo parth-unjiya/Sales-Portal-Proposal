@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="sales_proposal_view_form">
+        <field name="name">Sales Proposal Form View</field>
+        <field name="model">sales.proposal</field>
+        <field name="arch" type="xml">
+        <form string="Sale Proposal">
+            <header>
+                <field name="company_id" options="{'no_create': True}" invisible="1"/>
+                <button name="action_send_proposal_mail" string="Send by Email" type="object" states="draft,send"/>
+                <button name="action_draft" string="Reset To Draft" type="object" attrs="{'invisible': [('proposal_state', '!=', 'rejected')]}"/>
+                <button name="action_confirm_proposal" string="Confirm Proposal" type="object" attrs="{'invisible': ['|',('proposal_state', 'in', ('rejected', 'not_reviewed')), ('state','in', ('draft','confirm'))]}"/>
+                <field name="state" widget="statusbar"/>
+            </header>
+
+            <sheet>
+            <div class="oe_title">
+                <h1>
+                    <field name="name" readonly="1"/>
+                </h1>
+            </div>
+            <group>
+                <group>
+                    <field name="partner_id" widget="res_partner_many2one" context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}" options='{"always_reload": True}'/>
+                    <field name="partner_invoice_id" context="{'default_type':'invoice'}" options='{"always_reload": True}'/>
+                    <field name="partner_shipping_id"  context="{'default_type':'delivery'}" options='{"always_reload": True}'/>
+                    <field name="user_id" invisible="1"/>
+                </group>
+                <group>
+                    <field name="date_order"/>
+                    <field name="pricelist_id" options="{'no_create': True}"/>
+                    <field name="payment_term_id" options="{'no_open':True,'no_create': True}"/>
+                    <field name="fiscal_position_id" invisible="1"/>
+                </group>
+
+
+                <field name="company_id" invisible="1"/>
+                <field name="tax_country_id" invisible="1"/>
+                <field name="currency_id" invisible="1"/>
+                <notebook>
+                    <page string="Order Lines" name="order_line">
+                        <field name="order_line" widget="one2many">
+                            <tree editable="bottom" string="Order Lines" create="1">
+                                <field name="product_template_id" widget="many2one" invisible="1"/>
+                                <field name="product_id" widget="many2one"/>
+                                <field name="name"/>
+                                <field name="product_uom_qty"/>
+                                <field name="product_uom_qty_approved" attrs="{'column_invisible':['&amp;',('state','!=','send'),('proposal_state', 'in', ['rejected','not_reviewed'])]}"/>
+                                <field name="product_uom" />
+                                <field name="tax_id" widget="many2many_tags" options="{'no_create': True}" context="{'search_view_ref': 'account.account_tax_view_search'}" domain="[('type_tax_use','=','sale'), ('company_id','=',parent.company_id), ('country_id', '=', parent.tax_country_id)]"/>
+                                <field name="price_unit" />
+                                <field name="price_unit_approved" attrs="{'column_invisible':['&amp;',('state','!=','send'),('proposal_state', 'in', ['rejected','not_reviewed'])]}"/>
+                                <field name="price_subtotal" widget="monetary"/>
+                                <field name="price_subtotal_approved" string='Subtotal Approved' widget='monetary' attrs="{'column_invisible':['&amp;',('state','!=','send'),('proposal_state', 'in', ['rejected','not_reviewed'])]}"/>
+                                <field name="price_total" widget="monetary" invisible="1"/>
+                                <field name="price_tax" invisible="1"/>
+                                <field name="company_id" invisible="1"/>
+                                <field name="proposal_state" invisible="0"/>
+                                <field name="state" invisible="0"/>
+                                <field name="product_uom_category_id" invisible="1"/>
+                            </tree>
+                        </field>
+                        <group name="note_group" col="6" class="mt-2 mt-md-0">
+                            <group colspan="4">
+                                <field  colspan="2" name="note" nolabel="1" placeholder="Terms and conditions..."/>
+                            </group>
+                            <group class="oe_subtotal_footer oe_right" colspan="2" name="proposal_total">
+                                <field name="tax_totals" widget="account-tax-totals-field" nolabel="1" colspan="2" readonly="1"/>
+                            </group>
+                            <div class="clearfix"/>
+                        </group>
+                    </page>
+                    <page string="Other Info" name="other_information">
+                        <group>
+                            <group>
+                                <field name="proposal_state" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="order_id" readonly="1"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+            </group>
+            </sheet>
+            <div class="oe_chatter">
+                <field name="message_follower_ids"/>
+                <field name="activity_ids"/>
+                <field name="message_ids"/>
+            </div>
+        </form>
+        </field>
+    </record>
+
+
+        <record model="ir.ui.view" id="sales_proposal_tree_view">
+            <field name="name">Sales Proposal Tree View</field>
+            <field name="model">sales.proposal</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" string="Number" readonly="1" decoration-bf="1"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record model="ir.actions.act_window" id="sales_proposal_action">
+            <field name="name">Sales Proposals</field>
+            <field name="res_model">sales.proposal</field>
+            <field name="view_id" ref="sales_proposal_tree_view"/>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+</odoo>

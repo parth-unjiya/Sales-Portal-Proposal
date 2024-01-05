@@ -233,10 +233,6 @@ class SalesProposal(models.Model):
                 rec.currency_id,
             )
 
-    # def _portal_reback_action(self):
-    #     self.ensure_one()
-    #     return self.env.ref('sales_proposal.sales_proposal_action')
-
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:

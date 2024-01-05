@@ -96,11 +96,6 @@ class ProposalPortal(portal.CustomerPortal):
             order_sudo = self._document_check_access('sales.proposal', order_id, access_token=access_token)
         except (AccessError, MissingError):
             return request.redirect('/my')
-
-        # backend_url = f'/web#model={order_sudo._name}' \
-        #               f'&id={order_sudo.id}' \
-        #               f'&action={order_sudo._portal_reback_action().id}' \
-        #               f'&view_type=form'
         values = {
             'sales_proposal': order_sudo,
             'message': message,
